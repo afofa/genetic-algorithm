@@ -49,14 +49,14 @@ class CategoricalChromosome(Chromosome):
 
 	@staticmethod
 	def crossover(chromosome1:Chromosome, chromosome2:Chromosome) -> List[Chromosome]:
-		min_length = min(len(chromosome1), len(chromosome2))
+		min_length = min(len(chromosome1.genes), len(chromosome2.genes))
 		r = np.random.randint(0, min_length, size=2)
 
 		if r[0] > r[1]:
 			r[0], r[1] = r[1], r[0]
 
-		new_chromosome1_genes = chromosome1[:r[0]] + chromosome2[r[0]:r[1]] + chromosome1[r[1]:]
-		new_chromosome2_genes = chromosome2[:r[0]] + chromosome1[r[0]:r[1]] + chromosome2[r[1]:]
+		new_chromosome1_genes = chromosome1.genes[:r[0]] + chromosome2.genes[r[0]:r[1]] + chromosome1.genes[r[1]:]
+		new_chromosome2_genes = chromosome2.genes[:r[0]] + chromosome1.genes[r[0]:r[1]] + chromosome2.genes[r[1]:]
 
 		new_chromosome1 = CategoricalChromosome(new_chromosome1_genes)
 		new_chromosome2 = CategoricalChromosome(new_chromosome2_genes)

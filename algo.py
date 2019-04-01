@@ -62,7 +62,7 @@ class WeaselAlgorithm(EvolutionaryAlgorithm):
 		self.population_size = len(agents)
 		self.elitism_size = self._calculate_size(self.elitism_proportion, self.elitism_count, self.population_size)
 		self.wheel_size = self._calculate_size(self.wheel_proportion, self.wheel_count, self.population_size)
-		self.breed_size = self.population_size - self.elitism_size - self.wheel_size
+		self.breed_size = self.population_size - self.elitism_size
 
 		self.initialize_history()
 
@@ -127,10 +127,12 @@ class WeaselAlgorithm(EvolutionaryAlgorithm):
 			agents = self.agents
 
 		new_agents = []
-		for i in range(int(round(count/2))):
-			indices = np.random.choice(range(len(agents)), size=2, replace=False)
-			agent1, agent2 = agents[indices[0]], agents[indices[1]]
-			new_agents += CategoricalAgent.crossover(agent1, agent2)
+
+		if len(agents) > 0:
+			for i in range(int(round(count/2))):
+				indices = np.random.choice(range(len(agents)), size=2, replace=False)
+				agent1, agent2 = agents[indices[0]], agents[indices[1]]
+				new_agents += CategoricalAgent.crossover(agent1, agent2)
 		
 		return new_agents
 
@@ -149,9 +151,10 @@ class WeaselAlgorithm(EvolutionaryAlgorithm):
 		self.log_generation(fitnesses)
 		elitism_agents, wheel_selected = self.selection(fitnesses, elitism_size, wheel_size, agents)
 		breeded_agents = self.crossover(breed_size, wheel_selected)
-		all_agents = self.mutate(mutation_prob, agents=elitism_agents+breeded_agents)
+		all_agents = elitism_agents + breeded_agents
+		all_agent_mutated = self.mutate(mutation_prob, agents=all_agents)
 
-		return all_agents, elitism_agents[0].chromosome.get_gene_values()
+		return all_agent_mutated, elitism_agents[0].chromosome.get_gene_values()
 
 	def next_generation_with_elitism_and_mutation(self, elitism_size:int, mutation_prob:float, agents:List[CategoricalAgent]=None) -> List[CategoricalAgent]:
 		if agents is None:
@@ -223,7 +226,7 @@ if __name__ == '__main__':
 	target_str = "METHINKS IT IS LIKE A WEASEL"
 	num_of_genes = len(target_str)
 
-	elitism_proportion = 0.1
+	elitism_proportion = 0.2
 	wheel_proportion = 0.0
 	mutation_prob = 0.1
 
@@ -233,5 +236,5 @@ if __name__ == '__main__':
 	[agent.initialize(num_of_genes, CHARSET) for agent in agents]
 
 	algo = WeaselAlgorithm(env, agents, elitism_proportion, wheel_proportion, mutation_prob)
-	algo.run2(100)
+	algo.run(100)
 	
